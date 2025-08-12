@@ -12,7 +12,8 @@
             "svdFile": "STM32F103.svd",
             "preLaunchTask": "build",
             "device": "STM32F103C8",
-            "executable": "${workspaceFolder}/target/thumbv7m-none-eabi/release/test-rust-mcu"
+            "rtos": "FreeRTOS",
+            "executable": "${workspaceFolder}/target/thumbv7m-none-eabi/release/freertos-rust-example"
         }
     ]
 }

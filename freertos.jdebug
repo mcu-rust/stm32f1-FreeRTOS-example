@@ -24,10 +24,11 @@ void OnProjectLoad (void) {
   Project.SetTIFSpeed ("4 MHz");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M3.svd");
   Project.AddSvdFile ("$(ProjectDir)/STM32F103.svd");
+  Project.SetOSPlugin ("FreeRTOSPlugin_CM3");
   //
   // User settings
   //
-  File.Open ("$(ProjectDir)/target/thumbv7m-none-eabi/release/test-rust-mcu");
+  File.Open ("$(ProjectDir)/target/thumbv7m-none-eabi/release/freertos-rust-example");
 }
 
 /*********************************************************************
