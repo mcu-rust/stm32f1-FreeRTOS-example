@@ -1,5 +1,19 @@
 {
+    "editor.formatOnSave": true,
     "rust-analyzer.procMacro.enable": false,
     "rust-analyzer.cargo.allTargets": false,
     "rust-analyzer.cargo.target": "thumbv7m-none-eabi",
+    "cortex-debug.variableUseNaturalFormat": true,
+    "files.exclude": {
+        "FreeRTOS-Kernel/.*": true,
+        "FreeRTOS-Kernel/examples": true,
+        "FreeRTOS-Kernel/portable/[!G]*": true,
+        "FreeRTOS-Kernel/portable/GCC/[!A]*": true,
+        "FreeRTOS-Kernel/portable/GCC/A[!R]*": true,
+        "FreeRTOS-Kernel/portable/GCC/ARM[!_]*": true,
+        "FreeRTOS-Kernel/portable/GCC/ARM_[!C]*": true,
+        "FreeRTOS-Kernel/portable/GCC/ARM_C[!M]*": true,
+        "FreeRTOS-Kernel/portable/GCC/ARM_CM[!3]*": true,
+        "FreeRTOS-Kernel/portable/GCC/ARM_CM3[_35]*": true,
+    },
 }
