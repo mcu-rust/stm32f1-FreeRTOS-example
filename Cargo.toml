@@ -5,6 +5,10 @@
 
     # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+    default = []
+    i2c = []
+
 [dependencies]
     [dependencies.freertos-next]
         features = ["critical_section_impl"]
@@ -12,7 +16,7 @@
 
     [dependencies.stm32f1-hal]
         features = ["stm32f103", "x8"]
-        path = "../stm32f1-hal"
+        version = "0.5"
 
 [build-dependencies]
     freertos-build = "0.3"

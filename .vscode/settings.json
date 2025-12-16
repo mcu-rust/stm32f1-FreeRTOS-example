@@ -3,7 +3,7 @@
     "rust-analyzer.procMacro.enable": false,
     "rust-analyzer.cargo.allTargets": false,
     "rust-analyzer.cargo.target": "thumbv7m-none-eabi",
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
     "files.exclude": {
         "FreeRTOS-Kernel/.*": true,
         "FreeRTOS-Kernel/examples": true,
