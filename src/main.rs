@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
 mod i2c_task;
 mod led_task;

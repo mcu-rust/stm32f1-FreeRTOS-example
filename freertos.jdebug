@@ -28,7 +28,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
-  File.Open ("$(ProjectDir)/target/thumbv7m-none-eabi/release/freertos-rust-example");
+  File.Open ("$(ProjectDir)/target/thumbv7m-none-eabi/release/stm32f1-freertos-example");
 }
 
 /*********************************************************************

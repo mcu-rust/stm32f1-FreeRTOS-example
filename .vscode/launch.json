@@ -13,7 +13,7 @@
             "preLaunchTask": "build",
             "device": "STM32F103C8",
             "rtos": "FreeRTOS",
-            "executable": "${workspaceFolder}/target/thumbv7m-none-eabi/release/freertos-rust-example"
+            "executable": "${workspaceFolder}/target/thumbv7m-none-eabi/release/stm32f1-freertos-example"
         }
     ]
 }
