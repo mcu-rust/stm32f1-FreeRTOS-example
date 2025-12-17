@@ -2,6 +2,7 @@ use crate::os::*;
 
 pub struct LedTask<P> {
     led: P,
+    interval: OsTimeoutState,
 }
 
 impl<P> LedTask<P>
@@ -9,13 +10,20 @@ where
     P: StatefulOutputPin,
 {
     pub fn new(led: P) -> Self {
-        Self { led }
+        Self {
+            led,
+            interval: OS::timeout().start_ms(500),
+        }
     }
 
     pub fn run(&mut self) -> ! {
         loop {
-            self.led.toggle().ok();
-            OS::delay().delay_ms(200);
+            // test long interval timeout
+            if self.interval.timeout() {
+                self.led.toggle().ok();
+            }
+
+            OS::delay().delay_ms(100);
         }
     }
 }

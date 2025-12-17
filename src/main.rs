@@ -53,7 +53,6 @@ fn app_main() -> ! {
         .init()
         .freeze(rcc::Config::hse(8.MHz()).sysclk(sysclk), &mut flash.acr);
     assert_eq!(rcc.clocks().sysclk(), sysclk);
-    cp.SYST.init_sys_tick_instant();
 
     // Prepare ------------------------------------------------------
 
