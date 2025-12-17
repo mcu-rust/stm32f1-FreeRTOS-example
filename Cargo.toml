@@ -10,14 +10,14 @@
 [dependencies]
     [dependencies.freertos-next]
         features = ["critical_section_impl"]
-        version = "0.5"
+        version = "0.6"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]
         version = "0.7"
 
 [build-dependencies]
-    freertos-build = "0.3"
+    freertos-build = "0.4"
 
 [profile.release]
     # symbols are nice and they don't increase the size on Flash
