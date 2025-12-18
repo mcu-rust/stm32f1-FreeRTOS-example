@@ -1,4 +1,5 @@
 /target
+*.jdebug
 *.jdebug.user
 /.vscode/.cortex-debug*
 /*.lock
