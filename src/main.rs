@@ -145,12 +145,6 @@ fn app_main() -> ! {
     rx.run()
 }
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    asm::bkpt();
-    loop {}
-}
-
 mod all_it {
     use super::hal::interrupt_handler;
     interrupt_handler!(
@@ -159,4 +153,16 @@ mod all_it {
         (I2C1_EV, I2C1_EVENT_CB),
         (I2C1_ER, I2C1_ERR_CB),
     );
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn assert_callback(file_name_ptr: *const u8, line: u32) {
+    let file_name = unsafe { str_from_c_string(file_name_ptr).unwrap_or("Unknown") };
+    panic!("FreeRTOS ASSERT: {}:{}", file_name, line);
+}
+
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    asm::bkpt();
+    loop {}
 }

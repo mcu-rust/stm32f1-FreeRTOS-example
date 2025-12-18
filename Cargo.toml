@@ -10,7 +10,7 @@
 [dependencies]
     [dependencies.freertos-next]
         features = ["critical_section_impl"]
-        version = "0.6"
+        version = "0.7"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]

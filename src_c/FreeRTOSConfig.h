@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern void vAssertCalled(const char *const pcFileName, unsigned long ulLine);
+extern void assert_callback(uint32_t ulLine, const char *const pcFileName);
 #define configASSERT(x) \
     if ((x) == 0)       \
-    vAssertCalled(__FILE__, __LINE__)
+    assert_callback(__LINE__, __FILE__)
 
 #define vPortSVCHandler     SVCall
 #define xPortPendSVHandler  PendSV
