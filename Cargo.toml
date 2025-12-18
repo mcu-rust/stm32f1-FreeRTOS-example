@@ -9,7 +9,11 @@
 
 [dependencies]
     [dependencies.freertos-next]
-        features = ["critical_section_impl"]
+        features = [
+            "critical_section_impl",
+            "stack_high_water",
+            "heap_free_size",
+        ]
         version = "0.7"
 
     [dependencies.stm32f1-hal]

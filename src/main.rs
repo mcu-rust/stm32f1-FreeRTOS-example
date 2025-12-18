@@ -33,7 +33,7 @@ static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 fn main() -> ! {
     Task::new()
         .name("default")
-        .stack_size_bytes(2000)
+        .stack_size_bytes(1000)
         .start(move |_| {
             app_main();
         })
@@ -42,6 +42,13 @@ fn main() -> ! {
 }
 
 fn app_main() -> ! {
+    let default_task = init_main();
+    default_task();
+    loop {}
+}
+
+#[allow(unused)]
+fn init_main() -> impl FnOnce() {
     // clock --------------------------------------------------------
 
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -67,6 +74,9 @@ fn app_main() -> ! {
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL4, 6, true);
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL5, 6, true);
 
+    let mut tasks = Vec::with_capacity(6);
+    tasks.push(Task::current().unwrap());
+
     // Peripherals --------------------------------------------------
 
     let mut gpioa = dp.GPIOA.split(&mut mcu.rcc);
@@ -80,11 +90,13 @@ fn app_main() -> ! {
         .into_open_drain_output_with_state(&mut gpiob.crl, PinState::High);
     let mut led = LedTask::new(led);
 
-    Task::new()
-        .name("LEd")
-        .stack_size_bytes(500)
-        .start(move |_| led.run())
-        .unwrap();
+    tasks.push(
+        Task::new()
+            .name("LED")
+            .stack_size_bytes(400)
+            .start(move |_| led.run())
+            .unwrap(),
+    );
 
     // UART ---------------------------------------------------------
 
@@ -114,11 +126,21 @@ fn app_main() -> ! {
 
     let (mut tx, mut rx) = UartTask::new(uart_tx, uart_rx, 32);
 
-    Task::new()
-        .name("TX")
-        .stack_size_bytes(1000)
-        .start(move |_| tx.run())
-        .unwrap();
+    tasks.push(
+        Task::new()
+            .name("TX")
+            .stack_size_bytes(600)
+            .start(move |_| tx.run())
+            .unwrap(),
+    );
+
+    tasks.push(
+        Task::new()
+            .name("RX")
+            .stack_size_bytes(600)
+            .start(move |_| rx.run())
+            .unwrap(),
+    );
 
     // I2C ----------------------------------------------------------
 
@@ -135,14 +157,26 @@ fn app_main() -> ! {
         let dev = bus.new_device(i2c::Address::Seven(0b1101000), 200.kHz());
 
         let mut i2c = I2cTask::new(dev);
-        Task::new()
-            .name("I2C")
-            .stack_size_bytes(1000)
-            .start(move |_| i2c.run())
-            .unwrap();
+        tasks.push(
+            Task::new()
+                .name("I2C")
+                .stack_size_bytes(1000)
+                .start(move |_| i2c.run())
+                .unwrap(),
+        );
     }
 
-    rx.run()
+    let mut high_water = [0; 6];
+    let mut heap_free = GLOBAL.get_min_free_size();
+    move || {
+        loop {
+            OS::delay().delay_ms(1000);
+            for (i, task) in tasks.iter().enumerate() {
+                high_water[i] = task.get_stack_high_water_mark_bytes();
+            }
+            heap_free = GLOBAL.get_min_free_size();
+        }
+    }
 }
 
 mod all_it {

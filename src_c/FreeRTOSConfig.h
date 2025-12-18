@@ -30,7 +30,7 @@ extern void assert_callback(uint32_t ulLine, const char *const pcFileName);
 #define configCPU_CLOCK_HZ             (72000000UL)
 #define configTICK_RATE_HZ             ((TickType_t)1000)
 #define configMAX_PRIORITIES           (5)
-#define configMINIMAL_STACK_SIZE       ((uint16_t)80)
+#define configMINIMAL_STACK_SIZE       ((uint16_t)40)
 #define configTOTAL_HEAP_SIZE          ((size_t)(16 * 1024))
 #define configMAX_TASK_NAME_LEN        (16)
 #define configUSE_TRACE_FACILITY       1
