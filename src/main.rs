@@ -14,7 +14,7 @@ use os::*;
 use uart_task::UartTask;
 
 use core::panic::PanicInfo;
-use freertos_next::*;
+use freertos::*;
 use hal::{
     Mcu,
     cortex_m::asm,
