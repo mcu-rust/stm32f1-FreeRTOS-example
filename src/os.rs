@@ -5,7 +5,8 @@ pub use stm32f1_hal::{
 
 pub type OS = FreeRTOS<TaskNotifier>;
 pub type Mutex<T> = os_trait::Mutex<OS, T>;
-pub type OsTimeoutState = <OS as OsInterface>::TimeoutState;
+pub type OsTimeout = os_trait::Timeout<OS>;
+pub type OsDuration = os_trait::Duration<OS>;
 
 use freertos::{FreeRTOS, TaskNotifier};
 use hal::{os_trait, timer::SysTickInstant};

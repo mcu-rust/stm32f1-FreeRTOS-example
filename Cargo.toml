@@ -14,11 +14,11 @@
             "stack_high_water",
             "heap_free_size",
         ]
-        version = "0.7"
+        version = "0.8"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]
-        version = "0.7"
+        version = "0.8"
 
 [build-dependencies]
     freertos-build = "0.4"

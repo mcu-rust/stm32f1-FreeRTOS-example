@@ -2,7 +2,7 @@ use crate::os::*;
 
 pub struct LedTask<P> {
     led: P,
-    interval: OsTimeoutState,
+    interval: OsTimeout,
 }
 
 impl<P> LedTask<P>
@@ -12,7 +12,7 @@ where
     pub fn new(led: P) -> Self {
         Self {
             led,
-            interval: OS::timeout().start_ms(500),
+            interval: OsTimeout::from_millis(500),
         }
     }
 
