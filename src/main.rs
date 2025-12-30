@@ -117,10 +117,10 @@ fn init_main() -> impl FnOnce() {
     };
     let (uart_rx, mut rx_it) = uart_rx.into_dma_circle(dma_rx, 64, 10.millis());
     let (uart_tx, mut tx_it) = uart_tx.into_dma_ringbuf(dma_tx, 32, 10.millis());
-    all_it::DMA1_CH4_CB.set(&mut mcu, move || {
+    its::DMA1_CH4_CB.set(&mut mcu, move || {
         tx_it.interrupt_reload();
     });
-    all_it::DMA1_CH5_CB.set(&mut mcu, move || {
+    its::DMA1_CH5_CB.set(&mut mcu, move || {
         rx_it.interrupt_notify();
     });
 
@@ -152,8 +152,8 @@ fn init_main() -> impl FnOnce() {
             dp.I2C1
                 .init::<OS>(&mut mcu)
                 .into_interrupt_bus((scl, sda), 4, &mut mcu);
-        all_it::I2C1_EVENT_CB.set(&mut mcu, move || it.handler());
-        all_it::I2C1_ERR_CB.set(&mut mcu, move || it_err.handler());
+        its::I2C1_EVENT_CB.set(&mut mcu, move || it.handler());
+        its::I2C1_ERR_CB.set(&mut mcu, move || it_err.handler());
         let dev = bus.new_device(i2c::Address::Seven(0b1101000), 200.kHz());
 
         let mut i2c = I2cTask::new(dev);
@@ -179,7 +179,7 @@ fn init_main() -> impl FnOnce() {
     }
 }
 
-mod all_it {
+mod its {
     use super::hal::interrupt_handler;
     interrupt_handler!(
         (DMA1_CHANNEL4, DMA1_CH4_CB),

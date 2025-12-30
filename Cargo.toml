@@ -10,15 +10,16 @@
 [dependencies]
     [dependencies.freertos-next]
         features = [
+            "minimum",
             "critical_section_impl",
             "stack_high_water",
             "heap_free_size",
         ]
-        version = "0.8"
+        version = "0.9"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]
-        version = "0.8"
+        version = "0.9"
 
 [build-dependencies]
     freertos-build = "0.4"
