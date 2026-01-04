@@ -19,7 +19,7 @@
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]
-        version = "0.10"
+        version = "0.11"
 
 [build-dependencies]
     freertos-build = "0.4"

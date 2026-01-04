@@ -71,6 +71,7 @@ fn init_main() -> impl FnOnce() {
     // that the interrupt function doesn't call any OS APIs.
     mcu.nvic.set_priority(Interrupt::I2C1_EV, 5, true);
     mcu.nvic.set_priority(Interrupt::I2C1_ER, 5, true);
+    mcu.nvic.set_priority(Interrupt::USART1, 6, true);
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL4, 6, true);
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL5, 6, true);
 
@@ -115,14 +116,11 @@ fn init_main() -> impl FnOnce() {
     else {
         panic!()
     };
-    let (uart_rx, mut rx_it) = uart_rx.into_dma_circle(dma_rx, 64, 10.millis());
+    let (uart_rx, mut rx_it, mut idle_it) = uart_rx.into_dma_circle(dma_rx, 64, 10.millis());
     let (uart_tx, mut tx_it) = uart_tx.into_dma_ringbuf(dma_tx, 32, 10.millis());
-    its::DMA1_CH4_CB.set(&mut mcu, move || {
-        tx_it.interrupt_reload();
-    });
-    its::DMA1_CH5_CB.set(&mut mcu, move || {
-        rx_it.interrupt_notify();
-    });
+    its::DMA1_CH4_CB.set(&mut mcu, move || tx_it.interrupt_reload());
+    its::DMA1_CH5_CB.set(&mut mcu, move || rx_it.interrupt_notify());
+    its::USART1_CB.set(&mut mcu, move || idle_it.interrupt_notify());
 
     let (mut tx, mut rx) = UartTask::new(uart_tx, uart_rx, 32);
 
@@ -151,10 +149,10 @@ fn init_main() -> impl FnOnce() {
         let (bus, mut it, mut it_err) =
             dp.I2C1
                 .init::<OS>(&mut mcu)
-                .into_interrupt_bus((scl, sda), 4, &mut mcu);
+                .into_interrupt_bus((scl, sda), 200.kHz(), 4, &mut mcu);
         its::I2C1_EVENT_CB.set(&mut mcu, move || it.handler());
         its::I2C1_ERR_CB.set(&mut mcu, move || it_err.handler());
-        let dev = bus.new_device(i2c::Address::Seven(0b1101000), 200.kHz());
+        let dev = bus.new_device(i2c::Address::Seven(0b1101000));
 
         let mut i2c = I2cTask::new(dev);
         tasks.push(
@@ -186,6 +184,7 @@ mod its {
         (DMA1_CHANNEL5, DMA1_CH5_CB),
         (I2C1_EV, I2C1_EVENT_CB),
         (I2C1_ER, I2C1_ERR_CB),
+        (USART1, USART1_CB),
     );
 }
 
