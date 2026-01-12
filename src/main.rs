@@ -6,11 +6,13 @@
 mod i2c_task;
 mod led_task;
 mod os;
+mod spi_task;
 mod uart_task;
 
 use i2c_task::I2cTask;
 use led_task::LedTask;
 use os::*;
+use spi_task::SpiTask;
 use uart_task::UartTask;
 
 use core::panic::PanicInfo;
@@ -23,7 +25,7 @@ use hal::{
     gpio::PinState,
     i2c,
     pac::{self, Interrupt},
-    rcc, uart,
+    rcc, spi, uart,
 };
 
 #[global_allocator]
@@ -74,6 +76,7 @@ fn init_main() -> impl FnOnce() {
     mcu.nvic.set_priority(Interrupt::USART1, 6, true);
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL4, 6, true);
     mcu.nvic.set_priority(Interrupt::DMA1_CHANNEL5, 6, true);
+    mcu.nvic.set_priority(Interrupt::SPI1, 6, true);
 
     let mut tasks = Vec::with_capacity(6);
     tasks.push(Task::current().unwrap());
@@ -86,9 +89,7 @@ fn init_main() -> impl FnOnce() {
 
     // Blink --------------------------------------------------------
 
-    let led = gpiob
-        .pb0
-        .into_open_drain_output_with_state(&mut gpiob.crl, PinState::High);
+    let led = gpiob.pb0.into_open_drain_output_with_state(PinState::High);
     let mut led = LedTask::new(led);
 
     tasks.push(
@@ -101,8 +102,6 @@ fn init_main() -> impl FnOnce() {
 
     // UART ---------------------------------------------------------
 
-    let pin_tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
-    let pin_rx = gpioa.pa10.into_pull_up_input(&mut gpioa.crh);
     let mut dma_tx = dma1.4;
     let mut dma_rx = dma1.5;
     dma_tx.set_priority(DmaPriority::Medium);
@@ -112,7 +111,7 @@ fn init_main() -> impl FnOnce() {
     let (Some(uart_tx), Some(uart_rx)) =
         dp.USART1
             .init::<OS>(&mut mcu)
-            .into_tx_rx((pin_tx, pin_rx), config, &mut mcu)
+            .into_tx_rx((gpioa.pa9, gpioa.pa10), config, &mut mcu)
     else {
         panic!()
     };
@@ -144,25 +143,49 @@ fn init_main() -> impl FnOnce() {
 
     #[cfg(feature = "i2c")]
     {
-        let scl = gpiob.pb6.into_alternate_open_drain(&mut gpiob.crl);
-        let sda = gpiob.pb7.into_alternate_open_drain(&mut gpiob.crl);
-        let (bus, mut it, mut it_err) =
-            dp.I2C1
-                .init::<OS>(&mut mcu)
-                .into_interrupt_bus((scl, sda), 200.kHz(), 4, &mut mcu);
+        let (bus, mut it, mut it_err) = dp.I2C1.init::<OS>(&mut mcu).into_interrupt_bus(
+            (gpiob.pb6, gpiob.pb7),
+            200.kHz(),
+            4,
+            &mut mcu,
+        );
         its::I2C1_EVENT_CB.set(&mut mcu, move || it.handler());
         its::I2C1_ERR_CB.set(&mut mcu, move || it_err.handler());
-        let dev = bus.new_device(i2c::Address::Seven(0b1101000));
+        let dev = bus.new_device();
 
         let mut i2c = I2cTask::new(dev);
         tasks.push(
             Task::new()
                 .name("I2C")
-                .stack_size_bytes(1000)
+                .stack_size_bytes(600)
                 .start(move |_| i2c.run())
                 .unwrap(),
         );
     }
+
+    // SPI ----------------------------------------------------------
+
+    let pins = (gpioa.pa5, gpioa.pa6, gpioa.pa7);
+    let (mut bus, mut it, mut err_it) = dp
+        .SPI1
+        .init::<OS>(&mut mcu)
+        .into_interrupt_bus(pins, 4, &mut mcu);
+    its::SPI1_CB.set(&mut mcu, move || {
+        it.handler();
+        err_it.handler();
+    });
+
+    let dev = bus.new_device(spi::MODE_0, 200.kHz(), gpioa.pa4, 0.nanos());
+    let mut spi_task = SpiTask::new(dev);
+    tasks.push(
+        Task::new()
+            .name("SPI")
+            .stack_size_bytes(800)
+            .start(move |_| spi_task.run())
+            .unwrap(),
+    );
+
+    // Supervisor ---------------------------------------------------
 
     let mut high_water = [0; 6];
     let mut heap_free = GLOBAL.get_min_free_size();
@@ -185,6 +208,7 @@ mod its {
         (I2C1_EV, I2C1_EVENT_CB),
         (I2C1_ER, I2C1_ERR_CB),
         (USART1, USART1_CB),
+        (SPI1, SPI1_CB),
     );
 }
 
