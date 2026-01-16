@@ -11,23 +11,23 @@
     [dependencies.freertos-next]
         features = [
             "minimum",
-            "critical_section_impl",
-            "stack_high_water",
-            "heap_free_size",
+            "critical-section-impl",
+            "stack-high-water",
+            "heap-free-size",
         ]
-        version = "0.10"
+        version = "0.11"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8"]
         version = "0.12"
 
 [build-dependencies]
-    freertos-build = "0.4"
+    freertos-build = "0.5"
 
 [profile.release]
     # symbols are nice and they don't increase the size on Flash
     codegen-units = 1
     debug = true
-    # lto = true
+    lto = true
     opt-level = 2
     panic = 'abort'

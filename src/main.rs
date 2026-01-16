@@ -212,12 +212,6 @@ mod its {
     );
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn assert_callback(file_name_ptr: *const u8, line: u32) {
-    let file_name = unsafe { str_from_c_string(file_name_ptr).unwrap_or("Unknown") };
-    panic!("FreeRTOS ASSERT: {}:{}", file_name, line);
-}
-
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     asm::bkpt();
