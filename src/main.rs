@@ -9,6 +9,8 @@ mod os;
 mod spi_task;
 mod uart_task;
 
+use cortex_m_rt::{ExceptionFrame, entry, exception};
+use defmt_rtt as _;
 use i2c_task::I2cTask;
 use led_task::LedTask;
 use os::*;
@@ -20,7 +22,6 @@ use freertos::*;
 use hal::{
     Mcu,
     cortex_m::asm,
-    cortex_m_rt::entry,
     dma::DmaPriority,
     gpio::PinState,
     i2c,
@@ -196,6 +197,7 @@ fn init_main() -> impl FnOnce() {
                 high_water[i] = task.get_stack_high_water_mark_bytes();
             }
             heap_free = GLOBAL.get_min_free_size();
+            l::debug!("{}", high_water);
         }
     }
 }
@@ -212,8 +214,23 @@ mod its {
     );
 }
 
+#[allow(clippy::empty_loop)]
+#[defmt::panic_handler]
+fn defmt_panic() -> ! {
+    cortex_m::interrupt::disable();
+    loop {}
+}
+
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    asm::bkpt();
+fn panic(info: &PanicInfo) -> ! {
+    l::error!("{}", l::Display2Format(info));
+    cortex_m::interrupt::disable();
+    loop {}
+}
+
+#[allow(clippy::empty_loop)]
+#[exception]
+unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
+    l::error!("HardFault: {:#?}", l::Debug2Format(ef));
     loop {}
 }

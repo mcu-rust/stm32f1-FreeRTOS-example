@@ -8,6 +8,11 @@
     i2c = []
 
 [dependencies]
+    cortex-m-rt = "0.7"
+    defmt = "1"
+    defmt-or-log = "0.2"
+    defmt-rtt = "1"
+
     [dependencies.freertos-next]
         features = [
             "minimum",
@@ -18,16 +23,15 @@
         version = "0.11"
 
     [dependencies.stm32f1-hal]
-        features = ["f103", "x8"]
-        version = "0.12"
+        features = ["f103", "x8", "defmt"]
+        version = "0.13"
 
 [build-dependencies]
     freertos-build = "0.5"
 
-[profile.release]
-    # symbols are nice and they don't increase the size on Flash
+[profile.dev]
     codegen-units = 1
     debug = true
-    lto = true
-    opt-level = 2
+    # lto = true
+    opt-level = 1
     panic = 'abort'

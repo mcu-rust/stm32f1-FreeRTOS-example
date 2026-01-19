@@ -1,3 +1,4 @@
+pub use defmt as l;
 pub use freertos_next as freertos;
 pub use stm32f1_hal::{
     self as hal,
