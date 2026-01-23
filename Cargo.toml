@@ -20,14 +20,14 @@
             "stack-high-water",
             "heap-free-size",
         ]
-        version = "0.11"
+        version = "0.12"
 
     [dependencies.stm32f1-hal]
         features = ["f103", "x8", "defmt"]
-        version = "0.13"
+        version = "0.14"
 
 [build-dependencies]
-    freertos-build = "0.5"
+    freertos-build = "0.6"
 
 [profile.dev]
     codegen-units = 1
